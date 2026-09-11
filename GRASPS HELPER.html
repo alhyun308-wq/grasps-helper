@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GRASPS DESIGNER PRO</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css');
+        body { font-family: 'Pretendard', sans-serif; background-color: #f8fafc; }
+        /* 스크롤바 디자인 */
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+    </style>
+</head>
+<body class="h-screen overflow-hidden flex flex-col text-slate-800">
+
+    <!-- 상단 글로벌 네비게이션 바 -->
+    <nav class="bg-indigo-950 text-white h-16 flex items-center justify-between px-6 shadow-md z-20 shrink-0">
+        <div class="flex items-center gap-3">
+            <div class="bg-teal-400 text-indigo-950 w-8 h-8 rounded-lg flex items-center justify-center font-black text-xl">G</div>
+            <h1 class="text-lg font-extrabold tracking-widest">GRASPS <span class="text-indigo-300 font-medium text-sm ml-1">DESIGNER</span></h1>
+        </div>
+        <div class="flex items-center gap-4">
+            <a href="https://ncic.re.kr" target="_blank" class="text-xs text-indigo-200 hover:text-white transition-colors flex items-center gap-1">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"></path></svg>
+                NCIC 성취기준
+            </a>
+            <div class="h-4 w-px bg-indigo-700"></div>
+            <div class="text-xs font-medium bg-indigo-800/50 border border-indigo-700 px-3 py-1.5 rounded-full text-indigo-100 flex items-center gap-2">
+                <div class="w-2 h-2 rounded-full bg-teal-400 animate-pulse"></div>
+                수정: 창수초등학교 이정원
+            </div>
+        </div>
+    </nav>
+
+    <!-- 메인 레이아웃 (좌측 사이드바 + 우측 콘텐츠) -->
+    <div class="flex flex-1 overflow-hidden">
+        
+        <!-- 좌측 사이드바 (입력 영역) -->
+        <aside class="w-[400px] bg-white border-r border-slate-200 flex flex-col h-full shadow-[4px_0_24px_rgba(0,0,0,0.02)] z-10 shrink-0">
+            <div class="p-6 overflow-y-auto flex-1">
+                <div class="mb-8">
+                    <h2 class="text-xl font-bold text-slate-800 mb-1">수업 정보 입력</h2>
+                    <p class="text-xs text-slate-500">항목을 채우면 AI가 평가안을 구성합니다.</p>
+                </div>
+
+                <!-- 템플릿 선택 -->
+                <div class="mb-6 bg-slate-50 p-4 rounded-xl border border-slate-100">
+                    <label class="flex items-center gap-1.5 text-xs font-bold text-indigo-600 mb-2 uppercase tracking-wider">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+                        빠른 템플릿 불러오기
+                    </label>
+                    <select id="templateSelect" class="w-full bg-white border border-slate-200 rounded-lg p-2.5 text-sm outline-none focus:border-indigo-500 text-slate-700 shadow-sm cursor-pointer">
+                        <option value="">직접 입력하기 (선택 안함)</option>
+                        <option value="social3">3학년 사회: 옛날 풍습에 대해 알아보기</option>
+                        <option value="ethics4">4학년 도덕: 우리 고장의 문화유산 보호하기</option>
+                        <option value="science5">5학년 과학: 여러 가지 생물과 우리 생활</option>
+                    </select>
+                </div>
+
+                <!-- 입력 폼 -->
+                <div class="space-y-5">
+                    <div class="flex gap-4">
+                        <div class="w-1/2">
+                            <label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1.5">학년 <span class="text-rose-500">*</span></label>
+                            <input type="text" id="grade" class="w-full bg-slate-50 border border-slate-200 rounded-lg p-3 text-sm outline-none focus:bg-white focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 transition-all placeholder-slate-400" placeholder="예: 3학년">
+                        </div>
+                        <div class="w-1/2">
+                            <label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1.5">교과 <span class="text-rose-500">*</span></label>
+                            <input type="text" id="subject" class="w-full bg-slate-50 border border-slate-200 rounded-lg p-3 text-sm outline-none focus:bg-white focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 transition-all placeholder-slate-400" placeholder="예: 사회">
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1.5">단원 및 주제 <span class="text-rose-500">*</span></label>
+                        <input type="text" id="topic" class="w-full bg-slate-50 border border-slate-200 rounded-lg p-3 text-sm outline-none focus:bg-white focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 transition-all placeholder-slate-400" placeholder="예: 옛날 풍습에 대해 알아보기">
+                    </div>
+
+                    <div>
+                        <label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1.5">성취기준 <span class="text-rose-500">*</span></label>
+                        <textarea id="standards" rows="3" class="w-full bg-slate-50 border border-slate-200 rounded-lg p-3 text-sm outline-none focus:bg-white focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 transition-all resize-none placeholder-slate-400" placeholder="성취기준을 입력해주세요"></textarea>
+                    </div>
+
+                    <div>
+                        <label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1.5">추가 맥락 (선택)</label>
+                        <input type="text" id="additional" class="w-full bg-slate-50 border border-slate-200 rounded-lg p-3 text-sm outline-none focus:bg-white focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 transition-all placeholder-slate-400" placeholder="예: 태블릿 기기 활용, 모둠 활동">
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 하단 생성 버튼 고정 영역 -->
+            <div class="p-6 border-t border-slate-100 bg-white">
+                <button id="generateBtn" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-4 px-4 rounded-xl shadow-[0_4px_14px_0_rgba(79,70,229,0.39)] hover:shadow-[0_6px_20px_rgba(79,70,229,0.23)] transition-all flex items-center justify-center gap-2">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"></path></svg>
+                    GRASPS 설계 생성
+                </button>
+            </div>
+        </aside>
+
+        <!-- 우측 메인 콘텐츠 (결과 영역) -->
+        <main class="flex-1 bg-slate-50/50 flex flex-col h-full overflow-hidden relative">
+            
+            <!-- 상단 탭 툴바 -->
+            <div id="tabMenu" class="hidden h-16 bg-white border-b border-slate-200 flex items-center justify-between px-8 shrink-0">
+                <div class="flex gap-1 bg-slate-100 p-1 rounded-lg">
+                    <button id="tabCardBtn" onclick="switchTab('card')" class="px-5 py-1.5 text-sm font-bold rounded-md bg-white text-indigo-700 shadow-sm transition-all">
+                        설계 카드
+                    </button>
+                    <button id="tabRubricBtn" onclick="switchTab('rubric')" class="px-5 py-1.5 text-sm font-bold rounded-md text-slate-500 hover:text-slate-800 transition-all">
+                        평가 루브릭
+                    </button>
+                </div>
+                <button onclick="window.print()" class="px-4 py-2 text-sm font-semibold bg-white hover:bg-slate-50 text-slate-700 rounded-lg border border-slate-200 flex items-center gap-2 shadow-sm transition-all">
+                    <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path></svg>
+                    PDF 저장
+                </button>
+            </div>
+
+            <!-- 스크롤 가능한 본문 영역 -->
+            <div class="flex-1 overflow-y-auto p-8 custom-scrollbar">
+                
+                <!-- 초기 상태 -->
+                <div id="emptyState" class="h-full flex flex-col items-center justify-center text-center">
+                    <div class="w-24 h-24 bg-indigo-50 rounded-full flex items-center justify-center mb-6">
+                        <svg class="w-12 h-12 text-indigo-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"></path></svg>
+                    </div>
+                    <h3 class="text-xl font-bold text-slate-800 mb-2">새로운 수업 설계를 시작해볼까요?</h3>
+                    <p class="text-sm text-slate-500 max-w-sm">좌측 패널에서 수업 정보를 입력하시면, AI가 배움과 삶을 연결하는 실제적 수행평가 프레임워크를 제안합니다.</p>
+                </div>
+
+                <!-- 로딩 상태 -->
+                <div id="loadingState" class="hidden h-full flex flex-col items-center justify-center text-center">
+                    <div class="relative w-20 h-20 mb-6">
+                        <div class="absolute inset-0 rounded-full border-4 border-slate-100"></div>
+                        <div class="absolute inset-0 rounded-full border-4 border-indigo-600 border-t-transparent animate-spin"></div>
+                    </div>
+                    <h3 class="text-lg font-bold text-indigo-900 mb-1">프레임워크 및 루브릭 생성 중...</h3>
+                    <p class="text-sm text-slate-500">교육과정을 분석하고 있습니다. 잠시만 기다려주세요.</p>
+                </div>
+
+                <!-- 결과 표시 영역 -->
+                <div id="resultState" class="hidden max-w-4xl mx-auto pb-10">
+                    
+                    <!-- 결과 헤더 요약 박스 -->
+                    <div class="bg-white border border-slate-200 p-6 rounded-2xl mb-8 shadow-sm">
+                        <div class="flex items-center gap-2 mb-3">
+                            <span id="resBadgeGrade" class="bg-indigo-50 text-indigo-700 border border-indigo-100 text-[11px] font-bold px-2.5 py-1 rounded-md uppercase"></span>
+                            <span id="resBadgeSubject" class="bg-teal-50 text-teal-700 border border-teal-100 text-[11px] font-bold px-2.5 py-1 rounded-md uppercase"></span>
+                        </div>
+                        <h4 id="resTitle" class="text-2xl font-extrabold text-slate-800 mb-2"></h4>
+                        <p id="resStandardText" class="text-sm text-slate-600 font-medium"></p>
+                    </div>
+
+                    <!-- 1번 탭: GRASPS 카드 내용 -->
+                    <div id="contentCard" class="space-y-4"></div>
+
+                    <!-- 2번 탭: 평가 루브릭 내용 -->
+                    <div id="contentRubric" class="hidden">
+                        <div class="flex justify-between items-end mb-4">
+                            <div>
+                                <h4 class="font-bold text-slate-800 text-lg">성취수준 루브릭</h4>
+                                <p class="text-xs text-slate-500 mt-1">평가 기준별 4단계 성취수준 (테이블 내부를 클릭하여 텍스트 수정 가능)</p>
+                            </div>
+                        </div>
+                        <div class="overflow-hidden border border-slate-200 rounded-2xl bg-white shadow-sm">
+                            <table class="w-full text-sm text-left border-collapse">
+                                <thead>
+                                    <tr class="text-slate-600 border-b border-slate-200 text-center text-xs uppercase tracking-wider">
+                                        <th class="p-4 font-bold w-1/5 border-r border-slate-200 bg-slate-50">평가 요소</th>
+                                        <th class="p-4 font-bold w-1/5 border-r border-slate-200 bg-indigo-50 text-indigo-700">매우 우수 (4)</th>
+                                        <th class="p-4 font-bold w-1/5 border-r border-slate-200 bg-teal-50 text-teal-700">우수 (3)</th>
+                                        <th class="p-4 font-bold w-1/5 border-r border-slate-200 bg-amber-50 text-amber-700">보통 (2)</th>
+                                        <th class="p-4 font-bold w-1/5 bg-rose-50 text-rose-700">노력 요함 (1)</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="rubricTableBody" class="divide-y divide-slate-200"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        const API_KEY = "AQ.Ab8RN6KiJhz8dsxeP4HjrAp1LCGLTJbeXI0FWNQ5TJL4DgcHRw"; 
+
+        const templates = {
+            social3: { grade: "3학년", subject: "사회", topic: "옛날 풍습에 대해 알아보기", standards: "옛날 풍습에 대해 알아보고, 오늘날과 비교하여 변화상을 파악한다." },
+            ethics4: { grade: "4학년", subject: "도덕", topic: "우리 고장의 문화유산 보호하기", standards: "우리 고장의 문화유산에 대한 자부심을 가지고 보호하기 위한 실천 방안을 탐구한다." },
+            science5: { grade: "5학년", subject: "과학", topic: "여러 가지 생물과 우리 생활", standards: "생물이 우리 생활에 미치는 영향을 조사하고 유용한 생물 활용 방안을 발표한다." }
+        };
+
+        document.getElementById('templateSelect').addEventListener('change', function() {
+            const val = this.value;
+            if(templates[val]) {
+                document.getElementById('grade').value = templates[val].grade;
+                document.getElementById('subject').value = templates[val].subject;
+                document.getElementById('topic').value = templates[val].topic;
+                document.getElementById('standards').value = templates[val].standards;
+            } else {
+                document.getElementById('grade').value = "";
+                document.getElementById('subject').value = "";
+                document.getElementById('topic').value = "";
+                document.getElementById('standards').value = "";
+            }
+        });
+
+        function switchTab(tabName) {
+            const tabCardBtn = document.getElementById('tabCardBtn');
+            const tabRubricBtn = document.getElementById('tabRubricBtn');
+            const contentCard = document.getElementById('contentCard');
+            const contentRubric = document.getElementById('contentRubric');
+
+            const activeClass = "px-5 py-1.5 text-sm font-bold rounded-md bg-white text-indigo-700 shadow-sm transition-all";
+            const inactiveClass = "px-5 py-1.5 text-sm font-bold rounded-md text-slate-500 hover:text-slate-800 transition-all bg-transparent shadow-none";
+
+            if(tabName === 'card') {
+                tabCardBtn.className = activeClass;
+                tabRubricBtn.className = inactiveClass;
+                contentCard.classList.remove('hidden');
+                contentRubric.classList.add('hidden');
+            } else {
+                tabRubricBtn.className = activeClass;
+                tabCardBtn.className = inactiveClass;
+                contentRubric.classList.remove('hidden');
+                contentCard.classList.add('hidden');
+            }
+        }
+
+        const generateBtn = document.getElementById('generateBtn');
+        const emptyState = document.getElementById('emptyState');
+        const loadingState = document.getElementById('loadingState');
+        const resultState = document.getElementById('resultState');
+        const tabMenu = document.getElementById('tabMenu');
+        const resultContent = document.getElementById('contentCard');
+        const rubricTableBody = document.getElementById('rubricTableBody');
+
+        generateBtn.addEventListener('click', async () => {
+            const grade = document.getElementById('grade').value.trim();
+            const subject = document.getElementById('subject').value.trim();
+            const topic = document.getElementById('topic').value.trim();
+            const standards = document.getElementById('standards').value.trim();
+            const additional = document.getElementById('additional').value.trim();
+
+            if (!grade || !subject || !topic || !standards) {
+                alert("필수 입력 항목(학년, 교과, 단원 및 주제, 성취기준)을 모두 입력해주세요!");
+                return;
+            }
+
+            const prompt = `
+당신은 교육학 전문가이자 백워드 설계 전문가입니다. 
+다음 수업 정보를 바탕으로 GRASPS 프레임워크 수행평가 설계 및 4단계 성취수준 루브릭을 JSON 형태로 작성해주세요.
+
+- 학년: ${grade}
+- 교과: ${subject}
+- 단원/주제: ${topic}
+- 성취기준: ${standards}
+- 추가사항: ${additional || '없음'}
+
+반드시 아래 JSON 형식으로만 응답해주세요. 다른 부가 설명이나 백틱(\`\`\`json) 없이 순수 JSON 문자열만 출력하세요.
+
+{
+  "intro": "도입 개요 설명 문구",
+  "goal": "Goal(목표) 내용",
+  "role": "Role(역할) 내용",
+  "audience": "Audience(청중) 내용",
+  "situation": "Situation(상황) 내용",
+  "product": "Product(산출물 및 수행) 내용",
+  "standards_desc": "Standards(평가 기준 요약) 내용",
+  "rubric": [
+    { "element": "개념 이해 및 적용 (비중: 30%)", "lvl4": "매우 우수 수준 설명", "lvl3": "우수 수준 설명", "lvl2": "보통 수준 설명", "lvl1": "노력 요함 수준 설명" },
+    { "element": "탐구 및 문제해결성 (비중: 30%)", "lvl4": "매우 우수 수준 설명", "lvl3": "우수 수준 설명", "lvl2": "보통 수준 설명", "lvl1": "노력 요함 수준 설명" },
+    { "element": "산출물 표현/전달력 (비중: 20%)", "lvl4": "매우 우수 수준 설명", "lvl3": "우수 수준 설명", "lvl2": "보통 수준 설명", "lvl1": "노력 요함 수준 설명" },
+    { "element": "수행 태도 및 협동 (비중: 20%)", "lvl4": "매우 우수 수준 설명", "lvl3": "우수 수준 설명", "lvl2": "보통 수준 설명", "lvl1": "노력 요함 수준 설명" }
+  ]
+}
+`;
+
+            emptyState.classList.add('hidden');
+            resultState.classList.add('hidden');
+            tabMenu.classList.add('hidden');
+            loadingState.classList.remove('hidden');
+            generateBtn.disabled = true;
+            generateBtn.innerHTML = `
+                <div class="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                생성 중...
+            `;
+
+            try {
+                const cleanKey = API_KEY.trim(); 
+                const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash:generateContent?key=${cleanKey}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
+                });
+
+                if (!response.ok) throw new Error(`API 오류: ${response.status}`);
+
+                const data = await response.json();
+                let rawText = data.candidates[0].content.parts[0].text;
+
+                rawText = rawText.replace(/```json/g, '').replace(/```/g, '').trim();
+                const jsonResult = JSON.parse(rawText);
+
+                document.getElementById('resBadgeGrade').innerText = grade;
+                document.getElementById('resBadgeSubject').innerText = subject;
+                document.getElementById('resTitle').innerText = topic;
+                document.getElementById('resStandardText').innerText = `성취기준: ${standards}`;
+
+                let cardHtml = `
+                    <div class="bg-indigo-50/50 p-5 rounded-2xl border border-indigo-100 text-slate-700 mb-6 leading-relaxed">
+                        <strong class="text-indigo-900 font-extrabold text-base mb-2 block">안녕하세요. 교육학 전문가로서 ${grade} ${subject} 성취기준을 고려하여, 배움이 삶으로 이어질 수 있는 실천적이고 흥미로운 GRASPS 수행평가를 설계해 드립니다.</strong>
+                        ${jsonResult.intro}
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-[0_2px_10px_rgba(0,0,0,0.02)]">
+                            <div class="flex items-center gap-2 mb-2"><span class="text-xl">🎯</span> <strong class="text-indigo-900 font-bold">1. Goal (목표)</strong></div>
+                            <span class="text-slate-600 text-[15px] leading-relaxed block pl-7">${jsonResult.goal}</span>
+                        </div>
+                        <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-[0_2px_10px_rgba(0,0,0,0.02)]">
+                            <div class="flex items-center gap-2 mb-2"><span class="text-xl">🛡️</span> <strong class="text-indigo-900 font-bold">2. Role (역할)</strong></div>
+                            <span class="text-slate-600 text-[15px] leading-relaxed block pl-7">${jsonResult.role}</span>
+                        </div>
+                        <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-[0_2px_10px_rgba(0,0,0,0.02)]">
+                            <div class="flex items-center gap-2 mb-2"><span class="text-xl">👥</span> <strong class="text-indigo-900 font-bold">3. Audience (청중)</strong></div>
+                            <span class="text-slate-600 text-[15px] leading-relaxed block pl-7">${jsonResult.audience}</span>
+                        </div>
+                        <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-[0_2px_10px_rgba(0,0,0,0.02)]">
+                            <div class="flex items-center gap-2 mb-2"><span class="text-xl">🌍</span> <strong class="text-indigo-900 font-bold">4. Situation (상황)</strong></div>
+                            <span class="text-slate-600 text-[15px] leading-relaxed block pl-7">${jsonResult.situation}</span>
+                        </div>
+                        <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-[0_2px_10px_rgba(0,0,0,0.02)] md:col-span-2">
+                            <div class="flex items-center gap-2 mb-2"><span class="text-xl">📦</span> <strong class="text-indigo-900 font-bold">5. Product (결과물 및 수행)</strong></div>
+                            <span class="text-slate-600 text-[15px] leading-relaxed block pl-7">${jsonResult.product}</span>
+                        </div>
+                        <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-[0_2px_10px_rgba(0,0,0,0.02)] md:col-span-2">
+                            <div class="flex items-center gap-2 mb-2"><span class="text-xl">📐</span> <strong class="text-indigo-900 font-bold">6. Standards (평가 기준)</strong></div>
+                            <span class="text-slate-600 text-[15px] leading-relaxed block pl-7">${jsonResult.standards_desc}</span>
+                        </div>
+                    </div>
+                `;
+                resultContent.innerHTML = cardHtml;
+
+                let rubricHtml = '';
+                if(jsonResult.rubric && Array.isArray(jsonResult.rubric)) {
+                    jsonResult.rubric.forEach(row => {
+                        rubricHtml += `
+                            <tr class="hover:bg-slate-50 transition-colors">
+                                <td class="p-4 font-bold text-slate-800 border-r border-slate-200 bg-slate-50/50" contenteditable="true">${row.element}</td>
+                                <td class="p-4 text-slate-600 border-r border-slate-200 leading-relaxed" contenteditable="true">${row.lvl4}</td>
+                                <td class="p-4 text-slate-600 border-r border-slate-200 leading-relaxed" contenteditable="true">${row.lvl3}</td>
+                                <td class="p-4 text-slate-600 border-r border-slate-200 leading-relaxed" contenteditable="true">${row.lvl2}</td>
+                                <td class="p-4 text-slate-600 leading-relaxed" contenteditable="true">${row.lvl1}</td>
+                            </tr>
+                        `;
+                    });
+                }
+                rubricTableBody.innerHTML = rubricHtml;
+
+                loadingState.classList.add('hidden');
+                resultState.classList.remove('hidden');
+                tabMenu.classList.remove('hidden');
+                tabMenu.classList.add('flex');
+                switchTab('card');
+
+            } catch (error) {
+                alert("생성 중 오류가 발생했습니다. 다시 시도해주세요. 상세: " + error.message);
+                loadingState.classList.add('hidden');
+                emptyState.classList.remove('hidden');
+            } finally {
+                generateBtn.disabled = false;
+                generateBtn.innerHTML = `
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"></path></svg>
+                    GRASPS 설계 생성
+                `;
+            }
+        });
+    </script>
+</body>
+</html>
