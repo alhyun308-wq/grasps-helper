@@ -52,7 +52,6 @@
         <p class="eyebrow">BACKWARD DESIGN</p><h2 class="form-title" id="form-title">수업 정보 입력</h2><p class="form-desc">성취기준에서 출발해 수행평가 과제를 구성합니다.</p>
         <div class="template-box"><label class="template-label" for="template"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="m13 2-9 12h7l-1 8 10-12h-7z"></path></svg>예시 불러오기</label><select id="template"><option value="">직접 입력하기</option><option value="social">초등 사회 · 지역 문제</option><option value="science">초등 과학 · 생태계</option><option value="language">중등 국어 · 주장하는 글</option></select></div>
         <form id="design-form" novalidate="">
-<div class="field full"><label for="gemini-key">Gemini API 키</label><input id="gemini-key" type="password" autocomplete="off" placeholder="Google AI Studio API 키 입력"><p class="hint">API 키는 이 브라우저에만 저장됩니다.</p><button id="clear-api-key" class="action" type="button">저장된 키 삭제</button></div>
           <div class="form-grid"><div class="field"><label for="grade">학년 <em>*</em></label><input id="grade" name="grade" placeholder="예: 초등 5학년" autocomplete="off" maxlength="40" required=""></div><div class="field"><label for="subject">교과 <em>*</em></label><input id="subject" name="subject" placeholder="예: 사회" autocomplete="off" maxlength="60" required=""></div>
           <div class="field full"><label for="topic">단원 및 주제 <em>*</em></label><input id="topic" name="topic" placeholder="예: 우리 지역의 환경 문제" autocomplete="off" maxlength="160" required=""></div>
           <div class="field full"><label for="standard">성취기준 <em>*</em></label><textarea id="standard" name="standard" placeholder="학생이 최종적으로 이해하고 할 수 있어야 하는 내용을 입력하세요" maxlength="1600" required=""></textarea><p class="hint">성취기준을 구체적으로 입력할수록 과제의 방향이 분명해집니다.</p></div>
@@ -96,13 +95,11 @@
       function fitResultText(){if(!window.matchMedia('(max-width: 760px)').matches)return;document.querySelectorAll('#result textarea').forEach(area=>{area.style.height='auto';area.style.height=`${area.scrollHeight+2}px`})}
       $('result').addEventListener('input',fitResultText);
       window.addEventListener('resize',()=>{document.querySelectorAll('#result textarea').forEach(area=>area.style.height='');fitResultText()});
-      const keyField=$('gemini-key');
-      try{keyField.value=localStorage.getItem('grasps-gemini-key')||''}catch{}
-      keyField.addEventListener('change',()=>{try{localStorage.setItem('grasps-gemini-key',keyField.value.trim())}catch{}});
-      $('clear-api-key').addEventListener('click',()=>{keyField.value='';try{localStorage.removeItem('grasps-gemini-key')}catch{};announce('저장된 키를 삭제했습니다.')});
+      const getApiKey=()=>{try{return (localStorage.getItem('grasps-gemini-key')||'').trim()}catch{return ''}};
+      const redactSecrets=(text)=>{const key=getApiKey();return key?String(text).split(key).join('[API 키 비공개]'):String(text)};
       async function generate(data){
-        const key=keyField.value.trim();
-        if(!key)throw new Error('Gemini API 키를 먼저 입력하세요.');
+        const key=getApiKey();
+        if(!key)throw new Error('이 브라우저에는 API 연결이 설정되어 있지 않습니다. 관리자에게 문의하세요.');
         try{localStorage.setItem('grasps-gemini-key',key)}catch{}
         const prompt='한국의 수행평가 전문교사로서 GRASPS 설계안을 작성하세요. 한국어 JSON 객체만 반환하세요. 키는 title,subtitle,standard,evidence,parts,rubric 입니다. parts는 목표, 역할, 대상, 상황, 결과물, 성공기준 순서의 정확히 6개 문자열 배열입니다. rubric은 최소 3개의 평가 항목 배열로 각 항목은 criterion,excellent,satisfactory,needsSupport 문자열 필드를 가져야 합니다. 수준별 평가 문구는 관찰 가능한 행동으로 구분하세요. 학년,교과,단원과 주제,성취기준,추가 맥락: '+JSON.stringify(data);
         const controller=new AbortController();
@@ -135,7 +132,7 @@
           const design=await generate(data);render(design);save();announce('AI 설계안이 만들어졌습니다. 각 항목을 수정할 수 있습니다.');
           if(window.matchMedia('(max-width: 760px)').matches)$('result').scrollIntoView({behavior:'smooth',block:'start'});
           return design;
-        }catch(error){$('form-error').textContent=error.message||'AI 생성에 실패했습니다.';throw error;}
+        }catch(error){$('form-error').textContent=redactSecrets(error.message||'AI 생성에 실패했습니다.');throw error;}
         finally{button.disabled=false;button.removeAttribute('aria-busy');$('generate-label').textContent='GRASPS 생성하기';}
       }
       function render(design){
@@ -191,7 +188,7 @@
       $('rubric-tabs').addEventListener('keydown',(event)=>{const index=rubricLevels.findIndex(([key])=>key===selectedRubricLevel);const next=event.key==='ArrowRight'?(index+1)%3:event.key==='ArrowLeft'?(index+2)%3:event.key==='Home'?0:event.key==='End'?2:-1;if(next>=0){event.preventDefault();selectRubricLevel(rubricLevels[next][0],true)}});
       $('template').addEventListener('change',(event)=>{const sample=templates[event.target.value];if(!sample)return;fields.forEach(id=>$(id).value=sample[id]||'');$('form-error').textContent='';save();$('grade').focus();});
       fields.forEach(id=>$(id).addEventListener('input',()=>{ $(id).removeAttribute('aria-invalid');$('form-error').textContent='';save(); }));
-      $('copy-button').addEventListener('click',async()=>{if(!current)return;const rubric=Array.isArray(current.rubric)&&current.rubric.length>=3?[`평가 항목\n${rubricText()}`]:[];const text=[current.title,current.subtitle,'',`성취기준: ${current.standard}`,'',...labels.map(([,en,ko],i)=>`${ko} (${en})\n${current.parts[i]}`),'',...rubric,`평가 증거 확인\n${current.evidence}`].join('\n\n');try{await navigator.clipboard.writeText(text);announce('설계안 전체를 복사했습니다.')}catch{announce('복사할 수 없습니다. 브라우저의 클립보드 권한을 확인해 주세요.')}});
+      $('copy-button').addEventListener('click',async()=>{if(!current)return;const rubric=Array.isArray(current.rubric)&&current.rubric.length>=3?[`평가 항목\n${rubricText()}`]:[];const text=[current.title,current.subtitle,'',`성취기준: ${current.standard}`,'',...labels.map(([,en,ko],i)=>`${ko} (${en})\n${current.parts[i]}`),'',...rubric,`평가 증거 확인\n${current.evidence}`].join('\n\n');try{await navigator.clipboard.writeText(redactSecrets(text));announce('설계안 전체를 복사했습니다.')}catch{announce('복사할 수 없습니다. 브라우저의 클립보드 권한을 확인해 주세요.')}});
       $('print-button').addEventListener('click',()=>window.print());
       const saved=safeStore.get();if(saved?.input){fields.forEach(id=>{if(typeof saved.input[id]==='string')$(id).value=saved.input[id]});if(saved.output?.parts?.length===6)render(saved.output);}
 
